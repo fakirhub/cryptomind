@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020"><title>CryptoMind</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#141d31;--line:#293754;--muted:#9aa9c2;--txt:#f1f5ff;--blue:#7caaff;--green:#42d6a0;--red:#ff788c;--amber:#f4c66d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,Arial}main{max-width:950px;margin:auto;padding:15px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}h1{font-size:25px;margin:0}.sub,.muted,small{color:var(--muted)}.sub{font-size:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:13px}
+.controls,.row,.pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row{justify-content:space-between}
+input,select,button{background:#0c1426;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:11px;font:inherit}input{flex:1;min-width:140px}button{cursor:pointer}button.primary{background:#254a91;border-color:#426db8}.active{border-color:var(--blue);color:var(--blue)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.metric{background:#0d1528;border:1px solid var(--line);padding:11px;border-radius:10px;min-width:0}.metric small{display:block}.metric strong{display:block;margin-top:5px;font-size:18px;overflow-wrap:anywhere}
+h2{font-size:16px;margin:0 0 12px}.signal{font-size:27px;font-weight:800}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+canvas{width:100%;height:220px;background:#0d1528;border-radius:10px}.pills button{padding:8px 10px}.notice{font-size:12px;line-height:1.5;color:var(--muted)}#error{color:var(--red);white-space:pre-wrap;font-size:13px}
+@media(max-width:620px){main{padding:10px}.grid{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body><main>
+<header><div><h1>₿ CryptoMind</h1><div class="sub">CoinDCX Futures · Read-only analysis</div></div><div class="controls"><select id="currency"><option>USDT</option><option>INR</option></select><button id="refresh">Refresh</button></div></header>
+<section class="panel"><div class="controls"><input id="coin" list="coins" placeholder="Search BTC, ETH, SOL…"><datalist id="coins"></datalist><button class="primary" id="go">Analyze</button></div><div class="sub" id="status">Connect your public-data Worker to begin.</div></section>
+<section class="panel"><div class="row"><h2>Price chart</h2><span class="sub" id="stamp">—</span></div><div class="pills" id="frames"></div><canvas id="chart" width="900" height="250"></canvas></section>
+<section class="panel"><h2>Market indicators</h2><div class="grid">
+<div class="metric"><small>Last close</small><strong id="last">—</strong></div><div class="metric"><small>24h change</small><strong id="change">—</strong></div><div class="metric"><small>RSI 14</small><strong id="rsi">—</strong></div><div class="metric"><small>EMA 20 / 50</small><strong id="trend">—</strong></div></div></section>
+<section class="panel"><div class="row"><h2>CryptoMind signal</h2><span class="sub">Rule-based, not guaranteed</span></div><div class="signal amber" id="signal">WAIT</div><p class="muted" id="why">Choose a coin and tap Analyze.</p><div class="grid">
+<div class="metric"><small>Indicative entry zone</small><strong id="entry">—</strong></div><div class="metric"><small>Indicative stop loss</small><strong id="sl">—</strong></div><div class="metric"><small>Target 1</small><strong id="t1">—</strong></div><div class="metric"><small>Target 2</small><strong id="t2">—</strong></div></div><p class="notice">WAIT is valid. Levels are rough ATR-based study references, not trade instructions. Confidence is not displayed until proper historical testing is done.</p></section>
+<section class="panel"><h2>Connection & safety</h2><p class="notice">This dashboard uses public CoinDCX Futures data only. It does not access your account, wallet, balances, orders or positions. It cannot place or close trades. Verify every value in CoinDCX before making any manual decision.</p><div id="error"></div></section>
+</main>
+<script>
+/* After deploying worker.js, paste its URL here, e.g. https://cryptomind-api.YOURNAME.workers.dev */
+const API_BASE="PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+const $=x=>document.getElementById(x);let list=[],pair="",tf="5m",bars=[],prices={};
+const tfs=["1m","5m","15m","30m","1h","4h","1D"];
+$("frames").innerHTML=tfs.map(t=>`<button data-tf="${t}" class="${t===tf?"active":""}">${t}</button>`).join("");
+$("frames").onclick=e=>{let b=e.target.closest("[data-tf]");if(b){tf=b.dataset.tf;document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("active",x===b));runAnalysis()}};
+function name(p){return p.replace(/^B-/,"").replace(/_(USDT|INR)$/,"")}
+function fmt(v){return Number.isFinite(v)?(v>=100?v.toFixed(2):v>=1?v.toFixed(4):v.toPrecision(5)):"—"}
+async function get(path){if(API_BASE.startsWith("PASTE_"))throw Error("Worker URL abhi set nahi hua. Setup guide ka Step 3 complete kijiye.");let r=await fetch(API_BASE+path);let j=await r.json();if(!r.ok)throw Error(j.error||j.message||"API request failed");return j}
+function arrOf(x){if(Array.isArray(x))return x;if(x&&Array.isArray(x.data))return x.data;if(x&&Array.isArray(x.instruments))return x.instruments;return []}
+async function load(){try{$("error").textContent="";let c=$("currency").value;let x=await get("/instruments?currency="+c);list=arrOf(x).map(v=>typeof v==="string"?v:(v.instrument||v.pair||v.symbol||"")).filter(Boolean);$("coins").innerHTML=list.map(p=>`<option value="${name(p)}"></option>`).join("");if(!pair||!list.includes(pair))pair=list.find(p=>p.includes("BTC"))||list[0]||"";$("coin").value=name(pair);$("status").textContent=list.length+" active "+c+" futures instruments";let p=await get("/prices");prices=p.prices||p.data||p||{};if(pair)await runAnalysis()}catch(e){$("error").textContent=e.message}}
+async function runAnalysis(){if(!pair)return;try{$("error").textContent="";let x=await get("/candles?pair="+encodeURIComponent(pair)+"&timeframe="+tf);let raw=arrOf(x);bars=raw.map(c=>({time:Number(c.time||c.open_time||0),open:+c.open,high:+c.high,low:+c.low,close:+c.close,volume:+(c.volume||0)})).filter(c=>Number.isFinite(c.close));if(bars.length<55)throw Error("Candle history kam mila. Dusre timeframe par try karein.");draw();let v=bars.map(x=>x.close),last=v.at(-1),r=calcRsi(v),e20=ema(v,20).at(-1),e50=ema(v,50).at(-1),m=macd(v),up=e20>e50&&m.m>m.s&&r>50&&r<75,dn=e20<e50&&m.m<m.s&&r<50&&r>25,s=up?"LONG":dn?"SHORT":"WAIT";let recent=bars.slice(-20),sup=Math.min(...recent.map(x=>x.low)),res=Math.max(...recent.map(x=>x.high)),atr=recent.reduce((a,x)=>a+x.high-x.low,0)/recent.length;
+$("last").textContent=fmt(last);let pr=prices[pair];$("change").textContent=pr&&pr.change_24_hour!=null?Number(pr.change_24_hour).toFixed(2)+"%":pr&&pr.pc!=null?Number(pr.pc).toFixed(2)+"%":"—";$("rsi").textContent=r.toFixed(1);$("trend").textContent=e20>e50?"Bullish":e20<e50?"Bearish":"Neutral";
+$("signal").textContent=s;$("signal").className="signal "+(s==="LONG"?"green":s==="SHORT"?"red":"amber");$("why").textContent=`EMA trend ${$("trend").textContent}; MACD ${m.m>m.s?"above":"below"} signal; RSI ${r.toFixed(1)}. Nearby support ${fmt(sup)}, resistance ${fmt(res)}.`;
+$("entry").textContent=fmt(last-atr*.25)+" – "+fmt(last+atr*.25);$("sl").textContent=s==="LONG"?fmt(Math.min(sup,last-atr*1.5)):s==="SHORT"?fmt(Math.max(res,last+atr*1.5)):"Wait";$("t1").textContent=s==="LONG"?fmt(last+atr*2):s==="SHORT"?fmt(last-atr*2):"—";$("t2").textContent=s==="LONG"?fmt(last+atr*3):s==="SHORT"?fmt(last-atr*3):"—";$("stamp").textContent="Updated "+new Date().toLocaleTimeString();$("status").textContent=pair+" · "+tf+" · "+bars.length+" candles";
+}catch(e){$("error").textContent=e.message;$("signal").textContent="WAIT";$("why").textContent="Data unavailable; no setup generated."}}
+function ema(v,n){let k=2/(n+1),o=[];v.forEach((x,i)=>o.push(i?x*k+o[i-1]*(1-k):x));return o}
+function calcRsi(v,n=14){let g=0,l=0;for(let i=v.length-n;i<v.length;i++){let d=v[i]-v[i-1];if(d>0)g+=d;else l-=d}let rs=(g/n)/((l/n)||1e-12);return 100-100/(1+rs)}
+function macd(v){let a=ema(v,12),b=ema(v,26),m=v.map((_,i)=>a[i]-b[i]),s=ema(m,9);return{m:m.at(-1),s:s.at(-1)}}
+function draw(){let c=$("chart"),g=c.getContext("2d"),w=c.width,h=c.height;g.clearRect(0,0,w,h);let lo=Math.min(...bars.map(x=>x.low)),hi=Math.max(...bars.map(x=>x.high)),pad=(hi-lo)*.08||1;lo-=pad;hi+=pad;g.strokeStyle="#293754";for(let k=0;k<5;k++){let y=10+k*(h-20)/4;g.beginPath();g.moveTo(40,y);g.lineTo(w-5,y);g.stroke()}let step=(w-50)/bars.length;bars.forEach((d,i)=>{let x=42+i*step+step/2,yy=z=>h-10-(z-lo)/(hi-lo)*(h-20),up=d.close>=d.open;g.strokeStyle=up?"#42d6a0":"#ff788c";g.fillStyle=g.strokeStyle;g.beginPath();g.moveTo(x,yy(d.high));g.lineTo(x,yy(d.low));g.stroke();let y1=yy(d.open),y2=yy(d.close);g.fillRect(x-Math.max(1,step*.28),Math.min(y1,y2),Math.max(2,step*.56),Math.max(1,Math.abs(y2-y1)))})}
+$("go").onclick=()=>{let q=$("coin").value.trim().toUpperCase();let found=list.find(p=>name(p).toUpperCase()===q)||list.find(p=>name(p).toUpperCase().startsWith(q));if(!found){$("error").textContent="Selected margin currency mein coin nahi mila.";return}pair=found;runAnalysis()};
+$("currency").onchange=()=>{pair="";load()};$("refresh").onclick=()=>load();load();
+</script></body></html>
