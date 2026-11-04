@@ -27,7 +27,7 @@ canvas{width:100%;height:220px;background:#0d1528;border-radius:10px}.pills butt
 </main>
 <script>
 /* After deploying worker.js, paste its URL here, e.g. https://cryptomind-api.YOURNAME.workers.dev */
-const API_BASE="PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+const API_BASE="https://cryptomind-api.fakirhub.workers.dev";
 const $=x=>document.getElementById(x);let list=[],pair="",tf="5m",bars=[],prices={};
 const tfs=["1m","5m","15m","30m","1h","4h","1D"];
 $("frames").innerHTML=tfs.map(t=>`<button data-tf="${t}" class="${t===tf?"active":""}">${t}</button>`).join("");
