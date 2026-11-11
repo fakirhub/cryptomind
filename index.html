@@ -10,67 +10,43 @@
 :root{color-scheme:dark;--bg:#0b1020;--panel:#141d31;--line:#293754;--muted:#9aa9c2;--txt:#f1f5ff;--blue:#7caaff;--green:#42d6a0;--red:#ff788c;--amber:#f4c66d}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,Arial}
-main{max-width:950px;margin:auto;padding:15px}
+main{max-width:1000px;margin:auto;padding:15px}
 header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-h1{font-size:25px;margin:0}
-.sub,.muted,small{color:var(--muted)}
-.sub{font-size:12px}
+h1{font-size:25px;margin:0}.sub,.muted,small{color:var(--muted)}.sub{font-size:12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:13px}
-.controls,.row,.pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.row{justify-content:space-between}
+.controls,.row,.pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row{justify-content:space-between}
 input,select,button{background:#0c1426;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:11px;font:inherit}
-input{flex:1;min-width:140px}
-button{cursor:pointer}
-button.primary{background:#254a91;border-color:#426db8}
-.active{border-color:var(--blue);color:var(--blue)}
+input{flex:1;min-width:140px}button{cursor:pointer}button.primary{background:#254a91;border-color:#426db8}.active{border-color:var(--blue);color:var(--blue)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .metric{background:#0d1528;border:1px solid var(--line);padding:11px;border-radius:10px;min-width:0}
-.metric small{display:block}
-.metric strong{display:block;margin-top:5px;font-size:18px;overflow-wrap:anywhere}
-h2{font-size:16px;margin:0 0 12px}
-.signal{font-size:27px;font-weight:800}
-.green{color:var(--green)}
-.red{color:var(--red)}
-.amber{color:var(--amber)}
+.metric small{display:block}.metric strong{display:block;margin-top:5px;font-size:18px;overflow-wrap:anywhere}
+h2{font-size:16px;margin:0 0 12px}.signal{font-size:27px;font-weight:800}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
 canvas{width:100%;height:220px;background:#0d1528;border-radius:10px}
-.pills button{padding:8px 10px}
-.notice{font-size:12px;line-height:1.5;color:var(--muted)}
+.pills button{padding:8px 10px}.notice{font-size:12px;line-height:1.5;color:var(--muted)}
 #error{color:var(--red);white-space:pre-wrap;font-size:13px}
-.paper-row{padding:9px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.paper-row strong{display:block}
-.paper-row small{display:block}
-@media(max-width:620px){
-main{padding:10px}
-.grid{grid-template-columns:repeat(2,1fr)}
-}
+.paper-row{padding:10px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.paper-row strong{display:block}.paper-row small{display:block}
+.paper-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.paper-tools input{max-width:130px;min-width:100px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:20px;padding:3px 8px;font-size:11px;color:var(--muted)}
+.positive{color:var(--green)}.negative{color:var(--red)}
+@media(max-width:620px){main{padding:10px}.grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <main>
 <header>
-<div>
-<h1>₿ CryptoMind</h1>
-<div class="sub">CoinDCX Futures · Read-only analysis</div>
-</div>
-<div class="controls">
-<select id="currency"><option>USDT</option><option>INR</option></select>
-<button id="refresh">Refresh</button>
-</div>
+<div><h1>₿ CryptoMind</h1><div class="sub">CoinDCX Futures · Read-only analysis · Paper trading</div></div>
+<div class="controls"><select id="currency"><option>USDT</option><option>INR</option></select><button id="refresh">Refresh</button></div>
 </header>
 
 <section class="panel">
-<div class="controls">
-<input id="coin" list="coins" placeholder="Search BTC, ETH, SOL…">
-<datalist id="coins"></datalist>
-<button class="primary" id="go">Analyze</button>
-</div>
-<div class="sub" id="status">Connect your public-data Worker to begin.</div>
+<div class="controls"><input id="coin" list="coins" placeholder="Search BTC, ETH, SOL…"><datalist id="coins"></datalist><button class="primary" id="go">Analyze</button></div>
+<div class="sub" id="status">Connect your public-data Worker to begin.</div><div class="sub" id="autoStatus">Auto-update starting…</div>
 </section>
 
 <section class="panel">
 <div class="row"><h2>Price chart</h2><span class="sub" id="stamp">—</span></div>
-<div class="pills" id="frames"></div>
-<canvas id="chart" width="900" height="250"></canvas>
+<div class="pills" id="frames"></div><canvas id="chart" width="900" height="250"></canvas>
 </section>
 
 <section class="panel">
@@ -81,10 +57,11 @@ main{padding:10px}
 <div class="metric"><small>RSI 14</small><strong id="rsi">—</strong></div>
 <div class="metric"><small>EMA 20 / 50</small><strong id="trend">—</strong></div>
 </div>
+<p class="notice" id="quality">Signal filters: waiting for market data.</p>
 </section>
 
 <section class="panel">
-<div class="row"><h2>CryptoMind signal</h2><span class="sub">Rule-based, not guaranteed</span></div>
+<div class="row"><h2>CryptoMind signal</h2><span class="sub">Rule-based study signal · Not guaranteed</span></div>
 <div class="signal amber" id="signal">WAIT</div>
 <p class="muted" id="why">Choose a coin and tap Analyze.</p>
 <div class="grid">
@@ -93,24 +70,32 @@ main{padding:10px}
 <div class="metric"><small>Target 1</small><strong id="t1">—</strong></div>
 <div class="metric"><small>Target 2</small><strong id="t2">—</strong></div>
 </div>
-<p class="notice">WAIT is valid. Levels are rough ATR-based study references, not trade instructions. Confidence is not displayed until proper historical testing is done.</p>
+<p class="notice">WAIT is valid. The signal uses trend, momentum, volatility and volume checks where available. Levels are estimates; test in paper mode before relying on them.</p>
 </section>
-
 <section class="panel" id="paperPanel">
 <div class="row"><h2>Paper Trading History</h2><button id="clearPaper">Clear history</button></div>
-<div class="grid">
-<div class="metric"><small>Recorded trades</small><strong id="paperTotal">0</strong></div>
-<div class="metric"><small>Targets hit</small><strong id="paperWins">0</strong></div>
-<div class="metric"><small>Stop losses hit</small><strong id="paperLosses">0</strong></div>
-<div class="metric"><small>Still open</small><strong id="paperOpen">0</strong></div>
+<div class="paper-tools">
+<label class="sub" for="paperAmount">Paper position value (₹ / quote currency)</label>
+<input id="paperAmount" type="number" min="1" step="1" value="100">
+<button id="savePaperAmount">Save</button>
 </div>
-<p class="notice" id="paperNote">New LONG/SHORT signals are recorded automatically on this device. WAIT signals are not recorded.</p>
+<div class="grid" style="margin-top:10px">
+<div class="metric"><small>Recorded trades</small><strong id="paperTotal">0</strong></div>
+<div class="metric"><small>Profitable trades</small><strong id="paperWins">0</strong></div>
+<div class="metric"><small>Loss-making trades</small><strong id="paperLosses">0</strong></div>
+<div class="metric"><small>Still open</small><strong id="paperOpen">0</strong></div>
+<div class="metric"><small>Win rate (closed)</small><strong id="paperRate">—</strong></div>
+<div class="metric"><small>Net paper P/L</small><strong id="paperPnl">0.00</strong></div>
+<div class="metric"><small>Average P/L</small><strong id="paperAvg">—</strong></div>
+<div class="metric"><small>Target 2 hits</small><strong id="paperT2">0</strong></div>
+</div>
+<p class="notice" id="paperNote">LONG/SHORT signals are recorded automatically. T1 activates profit-lock and 50% trailing rules. Paper results are estimates from candle OHLC data, not exchange fills.</p>
 <div id="paperRows" class="notice">No paper trades recorded yet.</div>
 </section>
 
 <section class="panel">
 <h2>Connection & safety</h2>
-<p class="notice">This dashboard uses public CoinDCX Futures data only. It does not access your account, wallet, balances, orders or positions. It cannot place or close trades. Verify every value in CoinDCX before making any manual decision.</p>
+<p class="notice">This dashboard uses public CoinDCX Futures data only. It does not access your account, wallet, balances, orders or positions. It cannot place or close trades. Paper P/L excludes fees, funding, slippage and leverage unless you account for them separately. When SL and target are both touched in one candle, the simulator assumes SL first (conservative). Trailing updates are based on candle highs/lows, so exact intrabar order is unknown.</p>
 <div id="error"></div>
 </section>
 </main>
@@ -119,268 +104,323 @@ main{padding:10px}
 const API_BASE="https://cryptomind-api.fakirhub.workers.dev";
 const $=x=>document.getElementById(x);
 let list=[],pair="",tf="5m",bars=[],prices={};
-
 const tfs=["1m","5m","15m","30m","1h","4h","1D"];
-$("frames").innerHTML=tfs.map(t=>`<button data-tf="${t}" class="${t===tf?"active":""}">${t}</button>`).join("");
+let pollTimer=null, analysisBusy=false;
+const refreshMs={"1m":10000,"5m":15000,"15m":30000,"30m":60000,"1h":60000,"4h":60000,"1D":300000};
 
-$("frames").onclick=e=>{
-let b=e.target.closest("[data-tf]");
-if(b){
-tf=b.dataset.tf;
-document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("active",x===b));
-runAnalysis();
+function scheduleAutoRefresh(){
+ if(pollTimer)clearInterval(pollTimer);
+ const ms=refreshMs[tf]||30000;
+ $("autoStatus").textContent="Auto-update ON · every "+(ms/1000)+" sec";
+ pollTimer=setInterval(autoRefresh,ms);
 }
+async function autoRefresh(){
+ if(document.hidden||analysisBusy)return;
+ try{const p=await get("/prices");prices=p.prices||p.data||p||[]}catch(e){}
+ await runAnalysis();
+}
+$("frames").innerHTML=tfs.map(t=>`<button data-tf="${t}" class="${t===tf?"active":""}">${t}</button>`).join("");
+$("frames").onclick=e=>{
+ const b=e.target.closest("[data-tf]");
+ if(b){tf=b.dataset.tf;document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("active",x===b));scheduleAutoRefresh();runAnalysis();}
 };
 
-function name(p){return p.replace(/^B-/,"").replace(/_(USDT|INR)$/,"")}
-function fmt(v){return Number.isFinite(v)?(v>=100?v.toFixed(2):v>=1?v.toFixed(4):v.toPrecision(5)):"—"}
+function name(p){return String(p||"").replace(/^B-/,"").replace(/_(USDT|INR)$/,"")}
+function fmt(v){return Number.isFinite(v)?(Math.abs(v)>=100?v.toFixed(2):Math.abs(v)>=1?v.toFixed(4):v.toPrecision(5)):"—"}
+function safeNum(v){const n=Number(v);return Number.isFinite(n)?n:NaN}
 
 async function get(path){
-if(API_BASE.startsWith("PASTE_"))throw Error("Worker URL abhi set nahi hua.");
-let r=await fetch(API_BASE+path);
-let j=await r.json();
-if(!r.ok)throw Error(j.error||j.message||"API request failed");
-return j;
+ if(API_BASE.startsWith("PASTE_"))throw Error("Worker URL abhi set nahi hua.");
+ const r=await fetch(API_BASE+path);let j=await r.json();
+ if(!r.ok)throw Error(j.error||j.message||"API request failed");
+ return j;
 }
-
 function arrOf(x){
-if(Array.isArray(x))return x;
-if(x&&Array.isArray(x.data))return x.data;
-if(x&&Array.isArray(x.instruments))return x.instruments;
-return [];
+ if(Array.isArray(x))return x;
+ if(x&&Array.isArray(x.data))return x.data;
+ if(x&&Array.isArray(x.instruments))return x.instruments;
+ return [];
 }
 
-const PAPER_KEY="cryptomind_paper_v1";
-
+const PAPER_KEY="cryptomind_paper_v2",AMOUNT_KEY="cryptomind_paper_amount_v1";
 function paperRead(){
-try{return JSON.parse(localStorage.getItem(PAPER_KEY)||"[]")}
-catch{return []}
+ try{const a=JSON.parse(localStorage.getItem(PAPER_KEY)||"[]");return Array.isArray(a)?a:[]}catch{return []}
 }
-
-function paperSave(a){
-localStorage.setItem(PAPER_KEY,JSON.stringify(a));
-paperRender();
+function paperSave(a){localStorage.setItem(PAPER_KEY,JSON.stringify(a));paperRender()}
+function paperAmount(){
+ const n=Number(localStorage.getItem(AMOUNT_KEY)||$("paperAmount").value||100);
+ return Number.isFinite(n)&&n>0?n:100;
 }
-
+function calcPnl(t,exit){
+ const move=t.side==="LONG"?(exit-t.entry)/t.entry:(t.entry-exit)/t.entry;
+ return {pct:move*100,amount:(t.amount||100)*move};
+}
+function resultClass(r){
+ return r==="OPEN"?"amber":r==="TARGET 2 HIT"?"green":r.startsWith("SL")?(r==="SL 1 HIT"?"red":"green"):"amber";
+}
 function paperRender(){
-const a=paperRead();
-$("paperTotal").textContent=a.length;
-$("paperWins").textContent=a.filter(x=>x.result==="TARGET 1"||x.result==="TARGET 2").length;
-$("paperLosses").textContent=a.filter(x=>x.result==="STOP LOSS").length;
-$("paperOpen").textContent=a.filter(x=>x.result==="OPEN").length;
+ const a=paperRead(),closed=a.filter(x=>x.result!=="OPEN"),wins=closed.filter(x=>(x.pnlAmount||0)>0),losses=closed.filter(x=>(x.pnlAmount||0)<0);
+ const net=closed.reduce((s,x)=>s+(Number(x.pnlAmount)||0),0),avg=closed.length?net/closed.length:0;
+ $("paperTotal").textContent=a.length;$("paperWins").textContent=wins.length;$("paperLosses").textContent=losses.length;
+ $("paperOpen").textContent=a.filter(x=>x.result==="OPEN").length;
+ $("paperRate").textContent=closed.length?(wins.length/closed.length*100).toFixed(1)+"%":"—";
+ $("paperPnl").textContent=net.toFixed(2);$("paperPnl").className=net>=0?"positive":"negative";
+ $("paperAvg").textContent=closed.length?avg.toFixed(2):"—";
+ $("paperT2").textContent=a.filter(x=>x.result==="TARGET 2 HIT").length;
+ $("paperRows").innerHTML=a.length?a.slice().reverse().slice(0,30).map(x=>{
+  const pnl=x.result==="OPEN"?null:Number(x.pnlAmount||0);
+  const stage=x.slStage||1;
+  return `<div class="paper-row"><div>
+   <strong>${escapeHtml(x.coin)} · ${escapeHtml(x.tf)} · ${escapeHtml(x.side)} <span class="tag">${x.t1Hit?"T1 HIT":"T1 WAIT"}</span></strong>
+   <small>Entry ${fmt(x.entry)} · Current SL ${fmt(x.sl)} · T1 ${fmt(x.t1)} · T2 ${fmt(x.t2)}</small>
+   <small>${x.result==="OPEN"?"Active SL: "+(x.t1Hit?"SL "+stage:"SL 1"):"Exit "+fmt(x.exitPrice)+" · "+new Date(x.closed||x.created).toLocaleString()}</small>
+   <small>${new Date(x.created).toLocaleString()} · Position ${fmt(x.amount||100)}</small>
+  </div><div style="text-align:right"><strong class="${resultClass(x.result)}">${escapeHtml(x.result)}</strong><small>${pnl===null?"P/L pending":(pnl>=0?"+":"")+pnl.toFixed(2)+" ("+(Number(x.pnlPct)||0).toFixed(2)+"%)"}</small></div></div>`;
+ }).join(""):"No paper trades recorded yet.";
+}
+function escapeHtml(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))
+}
+$("paperAmount").value=localStorage.getItem(AMOUNT_KEY)||"100";
+$("savePaperAmount").onclick=()=>{
+ const n=Number($("paperAmount").value);
+ if(!Number.isFinite(n)||n<=0){$("error").textContent="Paper position value 0 se zyada rakhein.";return}
+ localStorage.setItem(AMOUNT_KEY,String(n));$("error").textContent="";paperRender()
+};
+$("clearPaper").onclick=()=>{
+ if(confirm("Delete all paper trading history from this device?")){localStorage.removeItem(PAPER_KEY);paperRender()}
+};
+paperRender();
 
-$("paperRows").innerHTML=a.length
-?a.slice().reverse().slice(0,12).map(x=>`
-<div class="paper-row">
-<div>
-<strong>${x.coin} · ${x.tf} · ${x.side}</strong>
-<small>Entry ${fmt(x.entry)} · SL ${fmt(x.sl)} · T1 ${fmt(x.t1)}</small>
-<small>${new Date(x.created).toLocaleString()}</small>
-</div>
-<strong class="${x.result==="STOP LOSS"?"red":x.result==="OPEN"?"amber":"green"}">${x.result}</strong>
-</div>`).join("")
-:"No paper trades recorded yet.";
+function closePaper(t,result,exit,candleTime){
+ const p=calcPnl(t,exit);t.result=result;t.exitPrice=exit;t.pnlAmount=p.amount;t.pnlPct=p.pct;t.closed=Date.now();t.exitCandleTime=candleTime;
+}
+function processTradeCandle(t,b){
+ const long=t.side==="LONG";
+ const hit=(level,high,low)=>long?low<=level:high>=level;
+ const targetHit=(level,high,low)=>long?high>=level:low<=level;
+
+ if(!t.t1Hit){
+  // Conservative: if original SL and T1 are both touched in one candle, SL wins.
+  if(hit(t.initialSL,b.high,b.low)){closePaper(t,"SL 1 HIT",t.initialSL,b.time);return true}
+  if(targetHit(t.t1,b.high,b.low)){
+   t.t1Hit=true;t.t1HitTime=b.time;t.slStage=2;
+   const t1Profit=long?(t.t1-t.entry):(t.entry-t.t1);
+   t.lockedProfit=Math.max(0,t1Profit*0.15);
+   t.baseLockedSL=long?t.entry+t.lockedProfit:t.entry-t.lockedProfit;
+   t.peak=long?Math.max(t.t1,b.high):Math.min(t.t1,b.low);
+   const favorable=long?Math.max(0,t.peak-t.t1):Math.max(0,t.t1-t.peak);
+   t.sl=long?t.baseLockedSL+favorable*0.5:t.baseLockedSL-favorable*0.5;
+   t.t2=long?t.initialT2+favorable*0.5:t.initialT2-favorable*0.5;
+   if(targetHit(t.initialT2,b.high,b.low)){closePaper(t,"TARGET 2 HIT",t.initialT2,b.time);return true}
+   if(hit(t.sl,b.high,b.low)){closePaper(t,"SL "+t.slStage+" HIT",t.sl,b.time);return true}
+  }
+  return false;
+ }
+ // Once T1 is hit, test active levels before moving them.
+ // If both levels are touched in one candle, assume SL first.
+ if(hit(t.sl,b.high,b.low)){
+  closePaper(t,"SL "+t.slStage+" HIT",t.sl,b.time);
+  return true;
+ }
+ if(targetHit(t.t2,b.high,b.low)){
+  closePaper(t,"TARGET 2 HIT",t.t2,b.time);
+  return true;
+ }
+
+ const newPeak=long?Math.max(t.peak,b.high):Math.min(t.peak,b.low);
+ const advanced=long?newPeak>t.peak:newPeak<t.peak;
+ if(advanced){
+  const favorable=long?newPeak-t.t1:t.t1-newPeak;
+  t.peak=newPeak;
+  t.slStage=(t.slStage||2)+1;
+  t.sl=long?t.baseLockedSL+favorable*0.5:t.baseLockedSL-favorable*0.5;
+  t.t2=long?t.initialT2+favorable*0.5:t.initialT2-favorable*0.5;
+ }
+ return false;
 }
 
 function paperTrack(){
-const a=paperRead();
-let changed=false;
-
-for(const t of a){
-if(t.result!=="OPEN"||t.pair!==pair||t.tf!==tf)continue;
-const later=bars.filter(b=>b.time>t.entryTime);
-
-for(const b of later){
-const hitSL=t.side==="LONG"?b.low<=t.sl:b.high>=t.sl;
-const hitT1=t.side==="LONG"?b.high>=t.t1:b.low<=t.t1;
-
-// If SL and target are both touched in one candle, count SL first.
-if(hitSL){
-t.result="STOP LOSS";
-t.closed=Date.now();
-changed=true;
-break;
-}
-if(hitT1){
-t.result="TARGET 1";
-t.closed=Date.now();
-changed=true;
-break;
-}
-}
-}
-if(changed)paperSave(a);
+ const a=paperRead();let changed=false;
+ for(const t of a){
+  if(t.result!=="OPEN"||t.pair!==pair||t.tf!==tf)continue;
+  const later=bars.filter(b=>b.time>(t.lastProcessedTime||t.entryTime)).sort((x,y)=>x.time-y.time);
+  for(const b of later){
+   const closed=processTradeCandle(t,b);
+   t.lastProcessedTime=b.time;changed=true;
+   if(closed)break;
+  }
+ }
+ if(changed)paperSave(a);
 }
 
 function paperRecord(side,entry,sl,t1,t2){
-if(side==="WAIT"||!bars.length||!Number.isFinite(sl)||!Number.isFinite(t1))return;
-const candle=bars[bars.length-1];
-const stamp=candle.time||Math.floor(Date.now()/60000);
-const key=pair+"|"+tf+"|"+stamp;
-const a=paperRead();
-if(a.some(x=>x.key===key))return;
-
-a.push({
-key,pair,coin:name(pair),tf,side,entry,sl,t1,t2,
-entryTime:candle.time||0,
-created:Date.now(),
-result:"OPEN"
-});
-paperSave(a);
+ if(side==="WAIT"||!bars.length||!Number.isFinite(sl)||!Number.isFinite(t1)||!Number.isFinite(t2))return;
+ const candle=bars[bars.length-1];
+ const stamp=candle.time||Math.floor(Date.now()/60000);
+ const key=pair+"|"+tf+"|"+stamp;
+ const a=paperRead();
+ if(a.some(x=>x.key===key))return;
+ a.push({
+  key,pair,coin:name(pair),tf,side,entry,
+  initialSL:sl,sl,t1,initialT2:t2,t2,
+  entryTime:candle.time||0,lastProcessedTime:candle.time||0,
+  amount:paperAmount(),created:Date.now(),
+  result:"OPEN",t1Hit:false,slStage:1
+ });
+ paperSave(a);
 }
-
-$("clearPaper").onclick=()=>{
-if(confirm("Delete all paper trading history from this device?")){
-localStorage.removeItem(PAPER_KEY);
-paperRender();
-}
-};
-paperRender();
 
 async function load(){
-try{
-$("error").textContent="";
-let c=$("currency").value;
-let x=await get("/instruments?currency="+c);
-list=arrOf(x).map(v=>typeof v==="string"?v:(v.instrument||v.pair||v.symbol||"")).filter(Boolean);
-$("coins").innerHTML=list.map(p=>`<option value="${name(p)}"></option>`).join("");
-if(!pair||!list.includes(pair))pair=list.find(p=>p.includes("BTC"))||list[0]||"";
-$("coin").value=name(pair);
-$("status").textContent=list.length+" active "+c+" futures instruments";
-let p=await get("/prices");
-prices=p.prices||p.data||p||{};
-if(pair)await runAnalysis();
-}catch(e){$("error").textContent=e.message}
-}
-
-async function runAnalysis(){
-if(!pair)return;
-try{
-$("error").textContent="";
-let x=await get("/candles?pair="+encodeURIComponent(pair)+"&timeframe="+tf);
-let raw=arrOf(x);
-
-bars=raw.map(c=>({
-time:Number(c.time||c.open_time||0),
-open:+c.open,high:+c.high,low:+c.low,close:+c.close,
-volume:+(c.volume||0)
-})).filter(c=>Number.isFinite(c.close));
-
-if(bars.length<55)throw Error("Candle history kam mila. Dusre timeframe par try karein.");
-
-draw();
-let v=bars.map(x=>x.close);
-let last=v.at(-1);
-let r=calcRsi(v);
-let e20=ema(v,20).at(-1);
-let e50=ema(v,50).at(-1);
-let m=macd(v);
-
-let up=e20>e50&&m.m>m.s&&r>50&&r<75;
-let dn=e20<e50&&m.m<m.s&&r<50&&r>25;
-let s=up?"LONG":dn?"SHORT":"WAIT";
-
-let recent=bars.slice(-20);
-let sup=Math.min(...recent.map(x=>x.low));
-let res=Math.max(...recent.map(x=>x.high));
-let atr=recent.reduce((a,x)=>a+x.high-x.low,0)/recent.length;
-
-$("last").textContent=fmt(last);
-let pr=prices[pair];
-$("change").textContent=pr&&pr.change_24_hour!=null?Number(pr.change_24_hour).toFixed(2)+"%":pr&&pr.pc!=null?Number(pr.pc).toFixed(2)+"%":"—";
-$("rsi").textContent=r.toFixed(1);
-$("trend").textContent=e20>e50?"Bullish":e20<e50?"Bearish":"Neutral";
-
-$("signal").textContent=s;
-$("signal").className="signal "+(s==="LONG"?"green":s==="SHORT"?"red":"amber");
-
-$("why").textContent=`EMA trend ${$("trend").textContent}; MACD ${m.m>m.s?"above":"below"} signal; RSI ${r.toFixed(1)}. Nearby support ${fmt(sup)}, resistance ${fmt(res)}.`;
-
-$("entry").textContent=fmt(last-atr*.25)+" – "+fmt(last+atr*.25);
-
-let stop=s==="LONG"?Math.min(sup,last-atr*1.5):s==="SHORT"?Math.max(res,last+atr*1.5):NaN;
-let target1=s==="LONG"?last+atr*2:s==="SHORT"?last-atr*2:NaN;
-let target2=s==="LONG"?last+atr*3:s==="SHORT"?last-atr*3:NaN;
-
-$("sl").textContent=Number.isFinite(stop)?fmt(stop):"Wait";
-$("t1").textContent=Number.isFinite(target1)?fmt(target1):"—";
-$("t2").textContent=Number.isFinite(target2)?fmt(target2):"—";
-
-paperTrack();
-paperRecord(s,last,stop,target1,target2);
-
-$("stamp").textContent="Updated "+new Date().toLocaleTimeString();
-$("status").textContent=pair+" · "+tf+" · "+bars.length+" candles";
-}catch(e){
-$("error").textContent=e.message;
-$("signal").textContent="WAIT";
-$("why").textContent="Data unavailable; no setup generated.";
-}
+ try{
+  $("error").textContent="";
+  const c=$("currency").value;
+  const x=await get("/instruments?currency="+c);
+  list=arrOf(x).map(v=>typeof v==="string"?v:(v.instrument||v.pair||v.symbol||"")).filter(Boolean);
+  $("coins").innerHTML=list.map(p=>`<option value="${escapeHtml(name(p))}"></option>`).join("");
+  if(!pair||!list.includes(pair))pair=list.find(p=>p.includes("BTC"))||list[0]||"";
+  $("coin").value=name(pair);
+  $("status").textContent=list.length+" active "+c+" futures instruments";
+  const p=await get("/prices");
+  prices=p.prices||p.data||p||{};
+  if(pair)await runAnalysis();
+ }catch(e){$("error").textContent=e.message}
 }
 
 function ema(v,n){
-let k=2/(n+1),o=[];
-v.forEach((x,i)=>o.push(i?x*k+o[i-1]*(1-k):x));
-return o;
+ const k=2/(n+1),o=[];
+ v.forEach((x,i)=>o.push(i?x*k+o[i-1]*(1-k):x));
+ return o;
 }
-
 function calcRsi(v,n=14){
-let g=0,l=0;
-for(let i=v.length-n;i<v.length;i++){
-let d=v[i]-v[i-1];
-if(d>0)g+=d;
-else l-=d;
+ if(v.length<n+1)return 50;
+ let gain=0,loss=0;
+ for(let i=1;i<=n;i++){
+  const d=v[i]-v[i-1];
+  if(d>0)gain+=d;else loss-=d;
+ }
+ let ag=gain/n,al=loss/n;
+ for(let i=n+1;i<v.length;i++){
+  const d=v[i]-v[i-1];
+  ag=(ag*(n-1)+Math.max(0,d))/n;
+  al=(al*(n-1)+Math.max(0,-d))/n;
+ }
+ if(al===0)return 100;
+ const rs=ag/al;
+ return 100-100/(1+rs);
 }
-let rs=(g/n)/((l/n)||1e-12);
-return 100-100/(1+rs);
-}
-
 function macd(v){
-let a=ema(v,12),b=ema(v,26);
-let m=v.map((_,i)=>a[i]-b[i]),s=ema(m,9);
-return{m:m.at(-1),s:s.at(-1)};
+ const a=ema(v,12),b=ema(v,26);
+ const m=v.map((_,i)=>a[i]-b[i]),s=ema(m,9);
+ return{m:m.at(-1),s:s.at(-1),hist:m.at(-1)-s.at(-1)};
+}
+function atrValue(data,n=14){
+ if(data.length<n+1)return 0;
+ const tr=[];
+ for(let i=1;i<data.length;i++){
+  const c=data[i],p=data[i-1];
+  tr.push(Math.max(c.high-c.low,Math.abs(c.high-p.close),Math.abs(c.low-p.close)));
+ }
+ return tr.slice(-n).reduce((a,b)=>a+b,0)/Math.min(n,tr.length);
 }
 
 function draw(){
-let c=$("chart"),g=c.getContext("2d"),w=c.width,h=c.height;
-g.clearRect(0,0,w,h);
-let lo=Math.min(...bars.map(x=>x.low));
-let hi=Math.max(...bars.map(x=>x.high));
-let pad=(hi-lo)*.08||1;
-lo-=pad;hi+=pad;
-
-g.strokeStyle="#293754";
-for(let k=0;k<5;k++){
-let y=10+k*(h-20)/4;
-g.beginPath();g.moveTo(40,y);g.lineTo(w-5,y);g.stroke();
+ const c=$("chart"),g=c.getContext("2d"),w=c.width,h=c.height;
+ g.clearRect(0,0,w,h);
+ if(!bars.length)return;
+ let lo=Math.min(...bars.map(x=>x.low));
+ let hi=Math.max(...bars.map(x=>x.high));
+ const pad=(hi-lo)*.08||1;
+ lo-=pad;hi+=pad;
+ g.strokeStyle="#293754";
+ for(let k=0;k<5;k++){
+  const y=10+k*(h-20)/4;
+  g.beginPath();g.moveTo(40,y);g.lineTo(w-5,y);g.stroke();
+ }
+ const visible=bars.slice(-120),step=(w-50)/visible.length;
+ visible.forEach((d,i)=>{
+  const x=42+i*step+step/2;
+  const yy=z=>h-10-(z-lo)/(hi-lo)*(h-20);
+  const up=d.close>=d.open;
+  g.strokeStyle=up?"#42d6a0":"#ff788c";
+  g.fillStyle=g.strokeStyle;
+  g.beginPath();g.moveTo(x,yy(d.high));g.lineTo(x,yy(d.low));g.stroke();
+  const y1=yy(d.open),y2=yy(d.close);
+  g.fillRect(x-Math.max(1,step*.28),Math.min(y1,y2),
+   Math.max(2,step*.56),Math.max(1,Math.abs(y2-y1)));
+ });
 }
 
-let step=(w-50)/bars.length;
-bars.forEach((d,i)=>{
-let x=42+i*step+step/2;
-let yy=z=>h-10-(z-lo)/(hi-lo)*(h-20);
-let up=d.close>=d.open;
-g.strokeStyle=up?"#42d6a0":"#ff788c";
-g.fillStyle=g.strokeStyle;
-g.beginPath();g.moveTo(x,yy(d.high));g.lineTo(x,yy(d.low));g.stroke();
-let y1=yy(d.open),y2=yy(d.close);
-g.fillRect(x-Math.max(1,step*.28),Math.min(y1,y2),Math.max(2,step*.56),Math.max(1,Math.abs(y2-y1)));
-});
+async function runAnalysis(){
+ if(!pair||analysisBusy)return;
+ analysisBusy=true;
+ try{
+  $("error").textContent="";
+  const x=await get("/candles?pair="+encodeURIComponent(pair)+"&timeframe="+tf);
+  const raw=arrOf(x);
+  bars=raw.map(c=>({
+   time:Number(c.time||c.open_time||0),
+   open:+c.open,high:+c.high,low:+c.low,
+   close:+c.close,volume:+(c.volume||0)
+  })).filter(c=>Number.isFinite(c.close)&&Number.isFinite(c.high)&&Number.isFinite(c.low)&&Number.isFinite(c.open)).sort((a,b)=>a.time-b.time);
+  if(bars.length<60)throw Error("Candle history kam mila. Dusre timeframe par try karein.");
+  draw();
+  const v=bars.map(x=>x.close),last=v.at(-1);
+  const r=calcRsi(v),e20=ema(v,20).at(-1),e50=ema(v,50).at(-1);
+  const m=macd(v),atr=atrValue(bars,14);
+  const recent=bars.slice(-20);
+  const sup=Math.min(...recent.map(x=>x.low));
+  const res=Math.max(...recent.map(x=>x.high));
+  const avgVol=bars.slice(-21,-1).reduce((s,x)=>s+x.volume,0)/20;
+  const curVol=bars.at(-1).volume;
+  const volKnown=avgVol>0&&curVol>0;
+  const volOK=!volKnown||curVol>=avgVol*.8;
+  const trendUp=e20>e50,trendDown=e20<e50;
+  const longScore=[trendUp,m.m>m.s,r>50&&r<72,volOK,last>e20].filter(Boolean).length;
+  const shortScore=[trendDown,m.m<m.s,r<50&&r>28,volOK,last<e20].filter(Boolean).length;
+  const validVol=atr>=last*.0005;
+  const up=longScore>=4&&validVol,dn=shortScore>=4&&validVol;
+  const s=up?"LONG":dn?"SHORT":"WAIT";
+  const risk=Math.max(atr*1.5,Math.abs(last-sup)*.35,Math.abs(res-last)*.35,last*.001);
+  const stop=s==="LONG"?last-risk:s==="SHORT"?last+risk:NaN;
+  const target1=s==="LONG"?last+risk*1.5:s==="SHORT"?last-risk*1.5:NaN;
+  const target2=s==="LONG"?last+risk*2.5:s==="SHORT"?last-risk*2.5:NaN;
+
+  $("last").textContent=fmt(last);
+  const pr=prices[pair];
+  $("change").textContent=pr&&pr.change_24_hour!=null?Number(pr.change_24_hour).toFixed(2)+"%":pr&&pr.pc!=null?Number(pr.pc).toFixed(2)+"%":"—";
+  $("rsi").textContent=r.toFixed(1);
+  $("trend").textContent=trendUp?"Bullish":trendDown?"Bearish":"Neutral";
+  $("signal").textContent=s;
+  $("signal").className="signal "+(s==="LONG"?"green":s==="SHORT"?"red":"amber");
+  $("why").textContent=`EMA ${trendUp?"bullish":trendDown?"bearish":"neutral"}; MACD ${m.m>m.s?"above":"below"} signal; RSI ${r.toFixed(1)}; score LONG ${longScore}/5, SHORT ${shortScore}/5.`;
+  $("quality").textContent=`ATR(14): ${fmt(atr)} · Volume confirmation: ${volKnown?(volOK?"passed":"weak"):"not supplied by feed"} · Minimum volatility: ${validVol?"passed":"too low"}. Signals need at least 4 of 5 checks.`;
+  $("entry").textContent=fmt(last-risk*.15)+" – "+fmt(last+risk*.15);
+  $("sl").textContent=Number.isFinite(stop)?fmt(stop):"Wait";
+  $("t1").textContent=Number.isFinite(target1)?fmt(target1):"—";
+  $("t2").textContent=Number.isFinite(target2)?fmt(target2):"—";
+  paperTrack();
+  paperRecord(s,last,stop,target1,target2);
+  $("stamp").textContent="Updated "+new Date().toLocaleTimeString();
+  $("status").textContent=pair+" · "+tf+" · "+bars.length+" candles";
+ }catch(e){
+  $("error").textContent=e.message;
+  $("signal").textContent="WAIT";
+  $("signal").className="signal amber";
+  $("why").textContent="Data unavailable; no setup generated.";
+ }finally{analysisBusy=false;}
 }
 
 $("go").onclick=()=>{
-let q=$("coin").value.trim().toUpperCase();
-let found=list.find(p=>name(p).toUpperCase()===q)||list.find(p=>name(p).toUpperCase().startsWith(q));
-if(!found){
-$("error").textContent="Selected margin currency mein coin nahi mila.";
-return;
-}
-pair=found;
-runAnalysis();
+ const q=$("coin").value.trim().toUpperCase();
+ const found=list.find(p=>name(p).toUpperCase()===q)||list.find(p=>name(p).toUpperCase().startsWith(q));
+ if(!found){$("error").textContent="Selected margin currency mein coin nahi mila.";return}
+ pair=found;runAnalysis();
 };
-
 $("currency").onchange=()=>{pair="";load()};
 $("refresh").onclick=()=>load();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)autoRefresh()});
+scheduleAutoRefresh();
 load();
 </script>
 </body>
